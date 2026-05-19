@@ -207,129 +207,196 @@
     </div>
 
     <script>
-        const audio = document.getElementById('bg-music');
+    const audio = document.getElementById('bg-music');
 
-        // 核心修复 6：利用微信桥接事件，在微信环境中提前静音加载音频上下文
-        document.addEventListener("WeixinJSBridgeReady", function () {
-            audio.play().then(() => {
-                audio.pause(); // 激活成功后立即暂停，等待用户点击开始
-            }).catch(e => console.log("微信音频预激活受阻"));
-        }, false);
+    // 微信音频预加载
+    document.addEventListener("WeixinJSBridgeReady", function () {
+        audio.play().then(() => { audio.pause(); }).catch(e => console.log("Audio ready"));
+    }, false);
 
-        function startExperience() {
-            // 用户触发交互，瞬间无缝播放音乐
-            audio.play().catch(e => console.log("播放受阻，等待正式交互"));
-            changeScene('scene-quiz');
+    function startExperience() {
+        audio.play().catch(e => console.log("Play interrupted"));
+        changeScene('scene-quiz');
+    }
+
+    // 7道融合实际情景的硬核题目设计
+    const questions = [
+        {
+            title: "【日常松弛】如果获得了一个完全不被打扰的空闲周六，你理想的充电方式更倾向于？",
+            options: [
+                { text: "拉上窗帘，让房间变成私人放映厅，沉浸在电影、游戏或纯粹的脑洞创作中。", value: 0 },
+                { text: "去户外捕捉第一缕阳光，或者在城市的街道、山野间漫无目的地探索未知空间。", value: 1 }
+            ]
+        },
+        {
+            title: "【社交气场】在必须要出席的社交或职场应酬里，面对那些令人窒息的“客套奉承”，你内心的真实弹幕通常是？",
+            options: [
+                { text: "“毁灭吧，赶紧的。”内心疯狂翻白眼，只想保持礼貌的沉默，保持最本真的自我。", value: 0 },
+                { text: "“来都来了，配合演一下。”能够自如地融入氛围、接梗甚至调侃，把它当成一场临时整活。", value: 1 }
+            ]
+        },
+        {
+            title: "【博弈思维】如果在一场对抗激烈的策略游戏（如炉石传说或硬核德式桌游）中胜负未分，你更享受哪种博弈的快感？",
+            options: [
+                { text: "精准计算、步步为营，靠严密的逻辑和控场将胜率稳稳拉满的掌控感。", value: 0 },
+                { text: "在局势千变万化时果断抉择，享受戏剧性反转与“富贵险中求”的心跳和张力。", value: 1 }
+            ]
+        },
+        {
+            title: "【审美通感】深夜在房间里挑灯夜战或胡思乱想时，如果必须选择一种背景感官，你觉得哪种更有质感？",
+            options: [
+                { text: "一壶幽香暗涌的东方墨兰茶，搭配极具叙事感的说唱律动或经典老歌。", value: 0 },
+                { text: "一杯加冰的微醺特调，搭配让人彻底放空的自然白噪音或纯音乐。", value: 1 }
+            ]
+        },
+        {
+            title: "【突发危机】和朋友去吃火锅或旅行，遇到需要长时间排队或者突发小意外时，你习惯扮演什么角色？",
+            options: [
+                { text: "“首席段子手。”就地开启整活和吐槽模式，用幽默消解焦虑，让等待变成喜剧现场。", value: 0 },
+                { text: "“硬核NPC。”迅速拿出手机寻找备用方案、计算时间成本，理智且高效地重新控场。", value: 1 }
+            ]
+        },
+        {
+            title: "【浪漫世界观】如果现实世界发生轻微扭曲，你更希望自己能像哪部作品的主角一样去经历冒险？",
+            options: [
+                { text: "《千与千寻》：在充满神明与秩序的未知小镇里，保持着最纯粹的善良与坚韧。", value: 0 },
+                { text: "《星际穿越》：在宏大的宇宙尺度与时间的缝隙里，依靠引力与直觉去寻找终极浪漫。", value: 1 }
+            ]
+        },
+        {
+            title: "【现实局留白】当面临一份真正让自己心动的感情或浪漫表白时，你更赞同哪种推进节奏？",
+            options: [
+                { text: "“现在还不是时候。”觉得真正的喜欢需要用时间慢慢熬，在现实的细节里慢慢拆解秘密。", value: 0 },
+                { text: "“直球才是必杀技。”既然电波已经对上，就应该在气氛最好的当下直接发出终极邀请。", value: 1 }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let totalScore = 0; // 累计1的总分，分值范围0-7
+
+    function changeScene(sceneId) {
+        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+        document.getElementById(sceneId).classList.add('active');
+        if (sceneId === 'scene-quiz') { renderQuestion(); }
+    }
+
+    function renderQuestion() {
+        if (currentQuestionIndex >= questions.length) { generateHardcoreReport(); return; }
+        
+        // 动态计算进度条百分比
+        const progress = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById('progress').style.width = `${progress}%`;
+
+        const q = questions[currentQuestionIndex];
+        document.getElementById('question-title').innerText = `${currentQuestionIndex + 1}. ${q.title}`;
+        
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        q.options.forEach((opt) => {
+            const card = document.createElement('div');
+            card.className = 'option-card';
+            card.innerText = opt.text;
+            card.onclick = () => { 
+                totalScore += opt.value;
+                currentQuestionIndex++; 
+                renderQuestion(); 
+            };
+            container.appendChild(card);
+        });
+    }
+
+    // 核心硬核算法：根据 0~7 的总分，精准划定 4 档完全不一样的真实报告文案
+    function generateHardcoreReport() {
+        document.getElementById('progress').style.width = '100%';
+        
+        let score = "95.2%";
+        let typeTitle = "未知共振";
+        let report = "";
+
+        if (totalScore <= 1) {
+            // 分数 0-1：极度同频（两个INFJ/深沉浪漫整活灵魂的碰撞）
+            score = "98.3%";
+            typeTitle = "天作之合 · 终极共振型";
+            report = "【我们在概率的荒原里，撞上了同一种无序】报告显示，你们在‘深度沉浸’、‘硬核策略’以及拒绝平庸的审美观上，有着近乎恐怖的重合度。你读得懂他看似跳脱整活背后的深沉与骨子里的真诚，也同样能在东方墨兰和《千与千寻》的纯粹里找到情绪共鸣。你眼中的理性，与他严密计算过胜率的控场完美咬合。这种契合度在算法模型中出现的概率仅为0.02%，你们的电波已经跨越了半个宇宙，成功接头。";
+        } 
+        else if (totalScore >= 2 && totalScore <= 3) {
+            // 分数 2-3：智力独立（相似的底色，各自独立的星系）
+            score = "92.6%";
+            typeTitle = "精神独立 · 同频探索型";
+            report = "【两个独立星系之间的引力交织】你们都拥有极高且坚固的精神独立性。你们不需要时刻粘稠，但在面对生活的‘迷雾重重’或突发危机时，一个人能拿出高效的执行力去开拓探索，另一个则能用严密的逻辑筑起防线。你们共同厌恶虚伪的阿谀奉承，乐于用独一无二的创意去链接现实。这种高维度的相似，让你们在保持自我的同时，又有着最天然的信任基础。";
+        } 
+        else if (totalScore >= 4 && totalScore <= 5) {
+            // 分数 4-5：势均力敌（博弈对手与灵魂镜像）
+            score = "83.4%";
+            typeTitle = "智力博弈 · 灵魂镜像型";
+            report = "【一场势均力敌的棋局】83.4% 是一个极具拉扯感和生命力的数字。你们的灵魂相遇，更像是一场《炉石传说》高端局的智力对弈——彼此都在试探对方的牌路，又忍不住为对方的突发整活和妙招暗自叫好。你们都不喜欢一成不变的无聊生活，在表达心意时也绝非敷衍之人。剩下的16.6%并不是距离，而是留给彼此在现实中一起去吃顿火锅、喝杯茶、慢慢拆解对方秘密的‘绝对留白’。";
+        } 
+        else {
+            // 分数 6-7：欢喜冤家（热烈与沉静，剧烈互补）
+            score = "76.8%";
+            typeTitle = "戏剧互补 · 欢喜冤家型";
+            report = "【像一壶静谧的东方墨兰，撞上了最热烈的火锅】你们一个是步步为营、喜欢胡思乱想的‘控场型隐士’，一个是享受生命力、随时准备出发的‘冒险家’。这种磁场极其奇妙——看似南辕北辙，实则充满了‘喜人奇妙夜’般的戏剧张力。他用创意和整活点亮你未曾注意的角落，你用直球和行动力带他打破时常熬夜的作茧自缚。这种互补结构，会让未来的每一次碰撞都充满未知的火花。";
         }
 
-        const questions = [
-            {
-                title: "如果突然获得一个完全由自己支配的无干扰周六，你的理想状态更倾向于？",
-                options: [
-                    "在没有天亮的清晨出发，去捕捉城市的第一缕光，或者在户外探索未知空间。",
-                    "拉上窗帘让房间变成私人放映厅，沉浸在电影、游戏、或是纯粹的数字艺术创作中。"
-                ]
-            },
-            {
-                title: "在面对充满不确定性的博弈（如复杂的桌游策略或人生选择）时，哪种快乐最能触动你？",
-                options: [
-                    "精准计算、步步为营，靠严密的逻辑和控场将胜率拉满的绝对掌控感。",
-                    "在局势莫测时果断抉择，享受戏剧性反转与‘富贵险中求’所带来的心跳与张力。"
-                ]
-            },
-            {
-                title: "如果有一艘驶向未知迷雾的远洋古船，你觉得自己的私人行李舱里最不能缺少什么？",
-                options: [
-                    "一台永不损坏的黑胶唱机与几张记录旧时代情绪的经典唱片。",
-                    "一张画满未触及大陆的神秘航海图与高精度罗盘。"
-                ]
-            }
-        ];
+        // 将计算出来的数据实时渲染到界面
+        document.querySelector('.score-display').innerText = score;
+        document.querySelector('#scene-result h2').innerText = typeTitle;
+        document.getElementById('result-text').innerText = report;
 
-        let currentQuestionIndex = 0;
+        setTimeout(() => { changeScene('scene-result'); }, 300);
+    }
 
-        function changeScene(sceneId) {
-            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
-            document.getElementById(sceneId).classList.add('active');
-            if (sceneId === 'scene-quiz') { renderQuestion(); }
+    function openModal() { document.getElementById('modal').classList.add('active'); }
+
+    function acceptInvitation(e) {
+        for (let i = 0; i < 15; i++) { createHeart(e.clientX || window.innerWidth/2, e.clientY || window.innerHeight/2); }
+        setTimeout(() => {
+            alert("✨ 加密信号已发送至小刘的终端。520 现实共振已就绪。");
+            document.getElementById('modal').classList.remove('active');
+        }, 800);
+    }
+
+    function createHeart(x, y) {
+        const heart = document.createElement('div');
+        heart.className = 'heart'; heart.innerHTML = '💜';
+        heart.style.left = x + 'px'; heart.style.top = y + 'px';
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 100 + 50;
+        heart.style.setProperty('--x', Math.cos(angle) * velocity + 'px');
+        heart.style.setProperty('--y', Math.sin(angle) * velocity + 'px');
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 1200);
+    }
+
+    // Canvas 背景粒子
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 1.2 + 0.4;
+            this.speedX = (Math.random() - 0.5) * 0.2; this.speedY = (Math.random() - 0.5) * 0.2;
+            this.alpha = Math.random() * 0.4 + 0.2;
         }
-
-        function renderQuestion() {
-            if (currentQuestionIndex >= questions.length) { generateReport(); return; }
-            
-            const progress = ((currentQuestionIndex) / questions.length) * 100;
-            document.getElementById('progress').style.width = `${progress}%`;
-
-            const q = questions[currentQuestionIndex];
-            document.getElementById('question-title').innerText = `${currentQuestionIndex + 1}. ${q.title}`;
-            
-            const container = document.getElementById('options-container');
-            container.innerHTML = '';
-            
-            q.options.forEach((opt) => {
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.innerText = opt;
-                card.onclick = () => { currentQuestionIndex++; renderQuestion(); };
-                container.appendChild(card);
-            });
+        update() { this.x += this.speedX; this.y += this.speedY; }
+        draw() {
+            ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#818cf8'; ctx.fill(); ctx.restore();
         }
-
-        function generateReport() {
-            document.getElementById('progress').style.width = '100%';
-            document.getElementById('result-text').innerText = "分析报告：你们的灵魂模型在‘深度沉浸’与‘理性思辨’两个维度上展现出了惊人的重叠度。你眼中的秩序与逻辑，与她心中的感性与美感，恰好构成了数学上最严密的互补结构。这种高维度的共振概率仅为 0.048%，属于极其罕见的‘精神共生网络’。";
-            setTimeout(() => { changeScene('scene-result'); }, 300);
-        }
-
-        function openModal() { document.getElementById('modal').classList.add('active'); }
-
-        function acceptInvitation(e) {
-            for (let i = 0; i < 15; i++) { createHeart(e.clientX || window.innerWidth/2, e.clientY || window.innerHeight/2); }
-            setTimeout(() => {
-                alert("✨ 加密信号已发送。520 现实共振已就绪。");
-                document.getElementById('modal').classList.remove('active');
-            }, 800);
-        }
-
-        function createHeart(x, y) {
-            const heart = document.createElement('div');
-            heart.className = 'heart'; heart.innerHTML = '💜';
-            heart.style.left = x + 'px'; heart.style.top = y + 'px';
-            const angle = Math.random() * Math.PI * 2;
-            const velocity = Math.random() * 100 + 50;
-            heart.style.setProperty('--x', Math.cos(angle) * velocity + 'px');
-            heart.style.setProperty('--y', Math.sin(angle) * velocity + 'px');
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 1200);
-        }
-
-        // Canvas 背景粒子
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.2 + 0.4;
-                this.speedX = (Math.random() - 0.5) * 0.2; this.speedY = (Math.random() - 0.5) * 0.2;
-                this.alpha = Math.random() * 0.4 + 0.2;
-            }
-            update() { this.x += this.speedX; this.y += this.speedY; }
-            draw() {
-                ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#818cf8'; ctx.fill(); ctx.restore();
-            }
-        }
-        for (let i = 0; i < 30; i++) { particles.push(new Particle()); }
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
-        animate();
-    </script>
+    }
+    for (let i = 0; i < 30; i++) { particles.push(new Particle()); }
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
 </body>
 </html>
