@@ -2,17 +2,16 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Resonance | 灵魂共振实验室</title>
     <style>
-        /* 延续主站的极简现代主义，融合数字艺术微醺调性 */
         :root {
             --bg-color: #0b0d13;
             --text-primary: #f3f4f6;
             --text-secondary: #9ca3af;
             --accent-glow: rgba(99, 102, 241, 0.15);
             --accent-linear: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-            --font-sans: 'Google Sans', 'PingFang SC', 'Helvetica Neue', sans-serif;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         * {
@@ -26,31 +25,32 @@
             background-color: var(--bg-color);
             color: var(--text-primary);
             font-family: var(--font-sans);
+            /* 核心修复 2：全面适配手机屏幕高度，动态计算，防止微信上下边栏遮挡 */
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom) 16px;
         }
 
-        /* 背景流光粒子 Canvas */
         #bg-canvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1;
             pointer-events: none;
         }
 
-        /* 核心容器 */
+        /* 核心修复 3：弹性容器，大小随手机屏幕自动缩放 */
         .container {
             position: relative;
-            width: 90%;
-            max-width: 440px;
-            height: 600px;
-            background: rgba(20, 24, 33, 0.75);
+            width: 100%;
+            max-width: 380px;
+            /* 手机端黄金高度，留出上下呼吸空间 */
+            height: 82vh; 
+            max-height: 600px;
+            background: rgba(20, 24, 33, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 24px;
             backdrop-filter: blur(20px);
@@ -58,22 +58,18 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px var(--accent-glow);
             z-index: 10;
             overflow: hidden;
-            padding: 40px 28px;
+            padding: 32px 24px;
             display: flex;
             flex-direction: column;
         }
 
-        /* 场景控制 */
         .scene {
             position: absolute;
-            top: 40px;
-            left: 28px;
-            right: 28px;
-            bottom: 40px;
+            top: 32px; left: 24px; right: 24px; bottom: 32px;
             opacity: 0;
             pointer-events: none;
-            transform: translateY(15px);
-            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -85,213 +81,147 @@
             transform: translateY(0);
         }
 
-        /* 顶部进度条 */
         .progress-container {
-            width: 100%;
-            height: 2px;
+            width: 100%; height: 2px;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 2px;
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: absolute; top: 0; left: 0;
         }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--accent-linear);
-            transition: width 0.4s ease;
-        }
+        .progress-bar { height: 100%; width: 0%; background: var(--accent-linear); transition: width 0.3s ease; }
 
-        /* 文本排版 */
         h1 {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 600;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             background: linear-gradient(120deg, #fff 40%, #a855f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
             line-height: 1.4;
+            margin-bottom: 16px;
         }
 
         p.description {
-            font-size: 14px;
+            font-size: 13.5px;
             color: var(--text-secondary);
-            line-height: 1.8;
-            letter-spacing: 0.5px;
+            line-height: 1.6;
         }
 
-        /* 按钮与选项样式 */
         .btn-primary {
             background: var(--accent-linear);
-            color: #fff;
-            border: none;
-            padding: 15px 30px;
+            color: #fff; border: none;
+            padding: 14px;
             border-radius: 14px;
-            font-size: 15px;
-            font-weight: 500;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: opacity 0.3s, transform 0.2s;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-            width: 100%;
-            text-align: center;
-        }
-        .btn-primary:active {
-            transform: scale(0.98);
+            font-size: 15px; font-weight: 500;
+            cursor: pointer; width: 100%; text-align: center;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
         }
 
         .options-group {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            margin-top: 30px;
-            flex-grow: 1;
-            justify-content: center;
+            gap: 12px;
+            margin: auto 0; /* 垂直居中撑开 */
         }
 
+        /* 核心修复 4：紧凑型卡片，防止手机端文字溢出 */
         .option-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 18px 20px;
-            border-radius: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.25s ease;
-            font-size: 14px;
-            line-height: 1.6;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            line-height: 1.5;
         }
-        .option-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(99, 102, 241, 0.4);
-        }
-        .option-card:active {
-            transform: scale(0.99);
-        }
+        .option-card:active { background: rgba(255, 255, 255, 0.08); transform: scale(0.98); }
 
-        /* 结果页定制 */
-        .result-header {
-            text-align: center;
-        }
         .score-display {
-            font-size: 64px;
-            font-weight: 700;
+            font-size: 56px; font-weight: 700;
             background: var(--accent-linear);
             -webkit-background-clip: text;
-            -webkit-text-color: transparent;
             -webkit-text-fill-color: transparent;
-            margin: 20px 0;
-            animation: pulse 2s infinite alternate;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.9; }
-            100% { transform: scale(1.03); opacity: 1; }
-        }
-
-        /* 弹窗样式 */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(7, 9, 14, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .modal-content {
-            background: #141821;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 85%;
-            max-width: 360px;
-            padding: 32px 24px;
-            border-radius: 20px;
+            margin: 15px 0;
             text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
         }
 
-        .modal-btns {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 24px;
+        /* 弹窗手机端优化 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(7, 9, 14, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 100; display: flex; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            background: #141821; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 85%; max-width: 320px; padding: 24px; border-radius: 20px; text-align: center;
+        }
+        .modal-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
 
-        /* 飞行爱心 */
-        .heart {
-            position: absolute;
-            font-size: 20px;
-            pointer-events: none;
-            z-index: 99;
-            animation: fly 1.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        @keyframes fly {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--x), var(--y)) scale(0.5); opacity: 0; }
-        }
+        .heart { position: absolute; font-size: 20px; pointer-events: none; z-index: 99; animation: fly 1.2s forwards ease-out; }
+        @keyframes fly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(0.5); opacity: 0; } }
     </style>
 </head>
 <body>
+
+    <audio id="bg-music" src="https://assets.mixkit.co/active_storage/sfx/123/123.wav" loop preload="auto"></audio>
 
     <canvas id="bg-canvas"></canvas>
 
     <div class="container">
         <div class="progress-container"><div class="progress-bar" id="progress"></div></div>
 
-        <!-- Scene 1: Welcome -->
         <section id="scene-welcome" class="scene active">
-            <div style="margin-top: 40px;">
+            <div style="margin-top: 20px;">
                 <h1>信号在相遇前<br>早已同频共振。</h1>
                 <p class="description">宇宙是一场盛大的无序。在庞杂的数字洪流与随机的日常里，有些审美品味与思维模型的交织，并非偶然。<br><br>这是一份关于灵魂相似度的无压力采样。</p>
             </div>
-            <button class="btn-primary" onclick="changeScene('scene-quiz')">开启共振测试</button>
+            <button class="btn-primary" onclick="startExperience()">开启共振测试</button>
         </section>
 
-        <!-- Scene 2: Quiz -->
         <section id="scene-quiz" class="scene">
-            <h3 id="question-title" style="font-size: 18px; font-weight: 500; line-height: 1.5; margin-top: 20px;">正在加载波动...</h3>
-            <div class="options-group" id="options-container">
-                <!-- JS 动态注入选项 -->
-            </div>
+            <h3 id="question-title" style="font-size: 16px; font-weight: 500; line-height: 1.5; margin-top: 10px;">正在加载波动...</h3>
+            <div class="options-group" id="options-container"></div>
         </section>
 
-        <!-- Scene 3: Result -->
         <section id="scene-result" class="scene">
-            <div class="result-header">
-                <p class="description" style="text-transform: uppercase; letter-spacing: 2px;">Resonance Report</p>
+            <div style="text-align: center;">
+                <p class="description" style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px;">Resonance Report</p>
                 <div class="score-display">95.2%</div>
-                <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">高维契合型灵魂</h2>
-                <p class="description" id="result-text" style="text-align: left; max-height: 220px; overflow-y: auto; padding-right: 4px;"></p>
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">高维契合型灵魂</h2>
+                <p class="description" id="result-text" style="text-align: left; max-height: 180px; overflow-y: auto; font-size: 13px;"></p>
             </div>
-            <button class="btn-primary" onclick="openModal()" style="margin-top: 15px;">解锁 520 限定隐藏信息</button>
+            <button class="btn-primary" onclick="openModal()">解锁 520 限定隐藏信息</button>
         </section>
     </div>
 
-    <!-- 520 邀请弹窗 -->
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
-            <h2 style="font-size: 20px; margin-bottom: 12px;">520 限定共振</h2>
-            <p class="description" style="font-size: 13.5px; line-height: 1.6;">既然数字模型已经完成了 95.2% 的同频，剩下的 4.8%，不如在现实中用一杯微醺或晚宴的温度来补齐？</p>
+            <h2 style="font-size: 18px; margin-bottom: 10px;">520 限定共振</h2>
+            <p class="description" style="font-size: 13px;">既然数字模型已经完成了 95.2% 的同频，剩下的 4.8%，不如在现实中用一杯微醺或晚宴的温度来补齐？</p>
             <div class="modal-btns">
                 <button class="btn-primary" onclick="acceptInvitation(event)">欣然接受线下共振</button>
-                <button class="btn-primary" onclick="acceptInvitation(event)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); box-shadow: none;">更渴望地接受</button>
+                <button class="btn-primary" onclick="acceptInvitation(event)" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); box-shadow: none;">更渴望地接受</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 核心题目设计：明修栈道（趣味与美感），暗度陈仓（试探共同话题）
+        const audio = document.getElementById('bg-music');
+
+        // 核心修复 6：利用微信桥接事件，在微信环境中提前静音加载音频上下文
+        document.addEventListener("WeixinJSBridgeReady", function () {
+            audio.play().then(() => {
+                audio.pause(); // 激活成功后立即暂停，等待用户点击开始
+            }).catch(e => console.log("微信音频预激活受阻"));
+        }, false);
+
+        function startExperience() {
+            // 用户触发交互，瞬间无缝播放音乐
+            audio.play().catch(e => console.log("播放受阻，等待正式交互"));
+            changeScene('scene-quiz');
+        }
+
         const questions = [
             {
                 title: "如果突然获得一个完全由自己支配的无干扰周六，你的理想状态更倾向于？",
@@ -321,16 +251,11 @@
         function changeScene(sceneId) {
             document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
             document.getElementById(sceneId).classList.add('active');
-            if (sceneId === 'scene-quiz') {
-                renderQuestion();
-            }
+            if (sceneId === 'scene-quiz') { renderQuestion(); }
         }
 
         function renderQuestion() {
-            if (currentQuestionIndex >= questions.length) {
-                generateReport();
-                return;
-            }
+            if (currentQuestionIndex >= questions.length) { generateReport(); return; }
             
             const progress = ((currentQuestionIndex) / questions.length) * 100;
             document.getElementById('progress').style.width = `${progress}%`;
@@ -341,108 +266,67 @@
             const container = document.getElementById('options-container');
             container.innerHTML = '';
             
-            q.options.forEach((opt, index) => {
+            q.options.forEach((opt) => {
                 const card = document.createElement('div');
                 card.className = 'option-card';
                 card.innerText = opt;
-                card.onclick = () => {
-                    currentQuestionIndex++;
-                    renderQuestion();
-                };
+                card.onclick = () => { currentQuestionIndex++; renderQuestion(); };
                 container.appendChild(card);
             });
         }
 
         function generateReport() {
             document.getElementById('progress').style.width = '100%';
-            // 采用富有逻辑且带有浪漫散文诗张力的定制批注
-            const analysisText = "分析报告：你们的灵魂模型在‘深度沉浸’与‘理性思辨’两个维度上展现出了惊人的重叠度。你眼中的秩序与逻辑，与她心中的感性与美感，恰好构成了数学上最严密的互补结构。这种高维度的共振概率仅为 0.048%，属于极其罕见的‘精神共生网络’。";
-            document.getElementById('result-text').innerText = analysisText;
-            setTimeout(() => {
-                changeScene('scene-result');
-            }, 400);
+            document.getElementById('result-text').innerText = "分析报告：你们的灵魂模型在‘深度沉浸’与‘理性思辨’两个维度上展现出了惊人的重叠度。你眼中的秩序与逻辑，与她心中的感性与美感，恰好构成了数学上最严密的互补结构。这种高维度的共振概率仅为 0.048%，属于极其罕见的‘精神共生网络’。";
+            setTimeout(() => { changeScene('scene-result'); }, 300);
         }
 
-        function openModal() {
-            document.getElementById('modal').classList.add('active');
-        }
+        function openModal() { document.getElementById('modal').classList.add('active'); }
 
         function acceptInvitation(e) {
-            // 点击任意按钮触发满屏飞行爱心特效
-            for (let i = 0; i < 15; i++) {
-                createHeart(e.clientX || window.innerWidth/2, e.clientY || window.innerHeight/2);
-            }
+            for (let i = 0; i < 15; i++) { createHeart(e.clientX || window.innerWidth/2, e.clientY || window.innerHeight/2); }
             setTimeout(() => {
-                alert("✨ 加密信号已发送至 Nick 的终端。520 现实共振已就绪。");
+                alert("✨ 加密信号已发送。520 现实共振已就绪。");
                 document.getElementById('modal').classList.remove('active');
-            }, 1000);
+            }, 800);
         }
 
         function createHeart(x, y) {
             const heart = document.createElement('div');
-            heart.className = 'heart';
-            heart.innerHTML = '💜';
-            heart.style.left = x + 'px';
-            heart.style.top = y + 'px';
-            
-            // 随机散射方向
+            heart.className = 'heart'; heart.innerHTML = '💜';
+            heart.style.left = x + 'px'; heart.style.top = y + 'px';
             const angle = Math.random() * Math.PI * 2;
-            const velocity = Math.random() * 120 + 60;
+            const velocity = Math.random() * 100 + 50;
             heart.style.setProperty('--x', Math.cos(angle) * velocity + 'px');
             heart.style.setProperty('--y', Math.sin(angle) * velocity + 'px');
-            
             document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 1500);
+            setTimeout(() => heart.remove(), 1200);
         }
 
-        // Canvas 动态背景粒子流（延续数字艺术与极简科技感）
+        // Canvas 背景粒子
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
 
         class Particle {
             constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.3;
-                this.speedY = (Math.random() - 0.5) * 0.3;
-                this.alpha = Math.random() * 0.5 + 0.2;
+                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.2 + 0.4;
+                this.speedX = (Math.random() - 0.5) * 0.2; this.speedY = (Math.random() - 0.5) * 0.2;
+                this.alpha = Math.random() * 0.4 + 0.2;
             }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-            }
+            update() { this.x += this.speedX; this.y += this.speedY; }
             draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = '#818cf8';
-                ctx.fill();
-                ctx.restore();
+                ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fillStyle = '#818cf8'; ctx.fill(); ctx.restore();
             }
         }
-
-        for (let i = 0; i < 40; i++) {
-            particles.push(new Particle());
-        }
-
+        for (let i = 0; i < 30; i++) { particles.push(new Particle()); }
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
+            particles.forEach(p => { p.update(); p.draw(); });
             requestAnimationFrame(animate);
         }
         animate();
