@@ -135,4 +135,184 @@
 
         <section id="scene-welcome" class="scene active">
             <div style="margin-top: 15px;">
-                <p
+                <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--accent-pink); font-weight: 600; margin-bottom: 6px;">DESIGNED BY NICK LIU</p>
+                <h1>小刘的<br>灵魂共振实验室。</h1>
+                <p class="description">
+                    见字如面。我是小刘，一个拒绝刻板、热衷整活、偶尔在深夜熬夜胡思乱想的双鱼座INFJ。<br><br>
+                    宇宙是一场盛大的无序。在庞杂的日常与随机的相遇里，有些审美品味与策略模型的咬合，并非偶然。<br><br>
+                    这是一份专门为你定制的、关于我们灵魂相似度的无压力采样。
+                </p>
+            </div>
+            <button class="btn-primary" onclick="startExperience()">开启浪漫共振</button>
+        </section>
+
+        <section id="scene-quiz" class="scene">
+            <h3 id="question-title" style="font-size: 15.5px; font-weight: 500; line-height: 1.6; color: #f3f4f6; margin-top: 10px;">正在连接波段...</h3>
+            <div class="options-group" id="options-container"></div>
+        </section>
+
+        <section id="scene-result" class="scene">
+            <div style="text-align: center;">
+                <p class="description" style="text-transform: uppercase; letter-spacing: 2px; font-size: 11px; color: var(--accent-pink);">Resonance Report</p>
+                <div class="score-display">95.2%</div>
+                <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #fff;">未知共振型</h2>
+                <p class="description" id="result-text" style="text-align: left; max-height: 200px; overflow-y: auto; font-size: 13px; padding-right: 4px;"></p>
+            </div>
+            <button class="btn-primary" onclick="openModal()">解锁 小刘的 520 限定信息</button>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <h2 style="font-size: 18px; margin-bottom: 12px; color: #fff;">520 限定邀请</h2>
+            <p class="description" style="font-size: 13px; line-height: 1.6;">既然数字算法已经完成了高维度的同频，剩下的那些未完待续，不如在现实中用一顿热烈火锅或一杯东方墨兰的温度来补齐？</p>
+            <div class="modal-btns" style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                <button class="btn-primary" onclick="acceptInvitation(event)">欣然接受线下共振</button>
+                <button class="btn-primary" onclick="acceptInvitation(event)" style="background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); box-shadow: none;">更渴望地接受</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('bg-music');
+
+        // 核心痛点 4 修复：利用微信WeixinJSBridgeReady黑科技，秒开音频环境，拒绝卡顿
+        document.addEventListener("WeixinJSBridgeReady", function () {
+            audio.play().then(() => { audio.pause(); }).catch(e => console.log("Audio warm-up"));
+        }, false);
+
+        function startExperience() {
+            audio.play().catch(e => console.log("Audio manual play"));
+            changeScene('scene-quiz');
+        }
+
+        // 7道融合实际情景的硬核题目
+        const questions = [
+            {
+                title: "【日常松弛】如果获得了一个完全不被打扰的空闲周六，你理想的充电方式更倾向于？",
+                options: [
+                    { text: "拉上窗帘躺在床上，沉浸在电影、游戏或纯粹的脑洞创作中。", value: 0 },
+                    { text: "去户外捕捉第一缕阳光，或者在城市的街道、山野间漫无目的地探索未知空间。", value: 1 }
+                ]
+            },
+            {
+                title: "【社交气场】在不得不出席的应酬里，面对无聊的“客套阿谀奉承”，你内心的真实弹幕通常是？",
+                options: [
+                    { text: "“毁灭吧，赶紧的。”内心疯狂翻白眼，只想保持沉默，留给自己最本真的清净。", value: 0 },
+                    { text: "“配合演一下。”能够迅速融入氛围甚至主动接梗调侃，把它当成一场临时整活。", value: 1 }
+                ]
+            },
+            {
+                title: "【博弈思维】如果在一场对抗激烈的策略游戏（如炉石传说或硬核桌游）中，你更享受哪种博弈快感？",
+                options: [
+                    { text: "精准计算、步步为营，靠严密的逻辑和控场将胜率稳稳拉满的掌控感。", value: 0 },
+                    { text: "在局势千变万化时果断抉择，享受戏剧性反转与“富贵险中求”的心跳和张力。", value: 1 }
+                ]
+            },
+            {
+                title: "【审美通感】深夜一个人胡思乱想或者熬夜时，如果必须选择一种背景感官，你觉得哪种更有质感？",
+                options: [
+                    { text: "一壶幽香暗涌的东方墨兰茶，搭配极具叙事感的说唱律动或经典老歌。", value: 0 },
+                    { text: "一杯加冰的微醺特调，搭配让人彻底放空的自然白噪音或纯音乐。", value: 1 }
+                ]
+            },
+            {
+                title: "【突发危机】和朋友去吃火锅，遇到需要长时间排队或者突发小意外时，你习惯扮演什么角色？",
+                options: [
+                    { text: "就地开启整活和吐槽模式，用幽默消解焦虑，把枯燥的等待变成喜剧现场。", value: 0 },
+                    { text: "迅速拿出手机寻找备用方案、计算时间成本，理智且高效地重新控场。", value: 1 }
+                ]
+            },
+            {
+                title: "【浪漫世界观】如果现实世界发生轻微扭曲，你更希望自己能像哪部作品的主角一样去经历冒险？",
+                options: [
+                    { text: "《千与千寻》：在充满神明与秩序的未知小镇里，保持着最纯粹的善良与坚韧。", value: 0 },
+                    { text: "《星际穿越》：在宏大的宇宙尺度与时间的缝隙里，依靠引力与直觉去寻找终极浪漫。", value: 1 }
+                ]
+            },
+            {
+                title: "【现实局留白】当面临一份真正让自己心动的浪漫表白时，你更赞同哪种推进节奏？",
+                options: [
+                    { text: "“现在还不是时候。”觉得真正的喜欢需要用时间慢慢熬，在细节里慢慢拆解秘密。", value: 0 },
+                    { text: "“直球才是必杀技。”既然电波已经对上，就应该在气氛最好的当下直接发出终极邀请。", value: 1 }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let totalScore = 0;
+
+        function changeScene(sceneId) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById(sceneId).classList.add('active');
+            if (sceneId === 'scene-quiz') { renderQuestion(); }
+        }
+
+        function renderQuestion() {
+            if (currentQuestionIndex >= questions.length) { generateHardcoreReport(); return; }
+            
+            const progress = ((currentQuestionIndex) / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+
+            const q = questions[currentQuestionIndex];
+            document.getElementById('question-title').innerText = `${currentQuestionIndex + 1}. ${q.title}`;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            q.options.forEach((opt) => {
+                const card = document.createElement('div');
+                card.className = 'option-card'; card.innerText = opt.text;
+                card.onclick = () => { totalScore += opt.value; currentQuestionIndex++; renderQuestion(); };
+                container.appendChild(card);
+            });
+        }
+
+        function generateHardcoreReport() {
+            document.getElementById('progress').style.width = '100%';
+            let score = "95.2%", typeTitle = "高维共振型", report = "";
+
+            if (totalScore <= 1) {
+                score = "98.3%"; typeTitle = "天作之合 · 终极共振型";
+                report = "【我们在概率的荒原里，撞上了同一种无序】报告显示，你们在‘深度沉浸’、‘硬核策略’以及拒绝平庸的审美观上，有着近乎恐怖的重合度。你读得懂小刘看似跳脱整活背后的深沉与双鱼座骨子里的真诚，也同样能在东方墨兰和《千与千寻》的纯粹里找到情绪共鸣。你眼中的理性，与他严密计算过胜率的控场完美咬合。这种契合度在算法模型中出现的概率仅为0.02%，你们的电波已经成功接头。";
+            } else if (totalScore >= 2 && totalScore <= 3) {
+                score = "92.6%"; typeTitle = "精神独立 · 同频探索型";
+                report = "【两个独立星系之间的引力交织】你们都拥有极高且坚固的精神独立性。你们不需要时刻粘稠，但在面对生活的‘迷雾重重’或突发危机时，一个人能拿出高效的执行力去开拓探索，小刘则能用严密的逻辑和幽默筑起防线。你们共同厌恶虚伪的阿谀奉承，乐于用独一无二的创意去链接现实。这种高维度的相似，让你们有着最天然的信任基础。";
+            } else if (totalScore >= 4 && totalScore <= 5) {
+                score = "83.4%"; typeTitle = "智力博弈 · 灵魂镜像型";
+                report = "【一场势均力敌的棋局】83.4% 是一个极具拉扯感和生命力的数字。你们的灵魂相遇，更像是一场《炉石传说》高端局的智力对弈——彼此都在试探对方的牌路，又忍不住为小刘的突发整活和妙招暗自叫好。你们都不喜欢一成不变的无聊生活，在表达心意时也绝非敷衍之人。剩下的16.6%并不是距离，而是留给彼此在现实中一起去吃顿火锅、慢慢拆解对方秘密的‘绝对留白’。";
+            } else {
+                score = "76.8%"; typeTitle = "戏剧互补 · 欢喜冤家型";
+                report = "【像一壶静谧的东方墨兰，撞上了最热烈的火锅】你们一个是步步为营、喜欢在床上胡思乱想的‘控场型隐士’，一个是享受生命力、随时准备出发的‘冒险家’。这种磁场极其奇妙——看似南辕北辙，实则充满了‘喜人奇妙夜’般的戏剧张力。小刘可以用创意和整活点亮你未曾注意的角落，你则可以用直球和行动力带他打破时常熬夜的作茧自缚。这种互补结构，会让未来充满未知的火花。";
+            }
+
+            document.querySelector('.score-display').innerText = score;
+            document.querySelector('#scene-result h2').innerText = typeTitle;
+            document.getElementById('result-text').innerText = report;
+            setTimeout(() => { changeScene('scene-result'); }, 300);
+        }
+
+        function openModal() { document.getElementById('modal').classList.add('active'); }
+
+        function acceptInvitation(e) {
+            for (let i = 0; i < 15; i++) { createHeart(e.clientX || window.innerWidth/2, e.clientY || window.innerHeight/2); }
+            setTimeout(() => {
+                alert("✨ 加密信号已发送至小刘的终端。520 现实共振已就绪。");
+                document.getElementById('modal').classList.remove('active');
+            }, 800);
+        }
+
+        function createHeart(x, y) {
+            const heart = document.createElement('div');
+            heart.className = 'heart'; heart.innerHTML = '💜';
+            heart.style.left = x + 'px'; heart.style.top = y + 'px';
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * 100 + 50;
+            heart.style.setProperty('--x', Math.cos(angle) * velocity + 'px');
+            heart.style.setProperty('--y', Math.sin(angle) * velocity + 'px');
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1200);
+        }
+    </script>
+</body>
+</html>
