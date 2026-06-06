@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 灵感探索工坊 | 互动教学社区</title>
+    <style>
+        :root {
+            --bg-natural: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #eef2f6 100%);
+            --primary-mint: #10b981;
+            --primary-hover: #059669;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(16, 185, 129, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        body {
+            background: var(--bg-natural);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 10px;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.05);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 1px dashed var(--card-border);
+            padding-bottom: 15px;
+        }
+        header h1 { font-size: 24px; color: var(--primary-mint); letter-spacing: 1px; }
+        header p { font-size: 13px; color: var(--text-muted); margin-top: 5px; }
+
+        #login-view {
+            text-align: center;
+            padding: 40px 10px;
+        }
+        .input-styled {
+            padding: 12px 16px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            font-size: 15px;
+            width: 100%;
+            max-width: 260px;
+            outline: none;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .input-styled:focus { border-color: var(--primary-mint); box-shadow: 0 0 10px rgba(16, 185, 129, 0.1); }
+        
+        .btn {
+            background: var(--primary-mint); color: white; border: none; padding: 12px 24px; border-radius: 12px;
+            font-size: 15px; cursor: pointer; font-weight: 500; transition: background 0.2s;
+        }
+        .btn:hover { background: var(--primary-hover); }
+
+        #main-content { display: none; flex-direction: column; gap: 24px; }
+
+        .fortune-box {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+            border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 16px; padding: 20px; text-align: center;
+        }
+        #fortune-result { margin-top: 12px; font-size: 15px; font-weight: 600; line-height: 1.6; padding: 12px; border-radius: 8px; display: none; animation: fadeIn 0.5s ease; }
+        .gold-tag { background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px dashed #f59e0b; }
+        .normal-tag { background: rgba(16, 185, 129, 0.05); color: #065f46; }
+
+        .chat-section { display: flex; flex-direction: column; gap: 16px; }
+        .post-box { display: flex; flex-direction: column; gap: 12px; background: #fff; padding: 16px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05); }
+        textarea { width: 100%; height: 80px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; font-size: 14px; resize: none; outline: none; }
+        textarea:focus { border-color: var(--primary-mint); }
+        
+        .media-upload-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .file-label { background: #f3f4f6; color: var(--text-main); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; border: 1px solid #e5e7eb; }
+        .file-label:hover { background: #e5e7eb; }
+        input[type="file"] { display: none; }
+
+        .message-feed { display: flex; flex-direction: column; gap: 16px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        .msg-card { background: #fff; padding: 16px; border-radius: 16px; border-left: 4px solid var(--primary-mint); box-shadow: 0 2px 8px rgba(0,0,0,0.02); animation: slideUp 0.4s ease; }
+        .msg-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .msg-user { font-weight: 600; color: #374151; }
+        .msg-text { font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 8px; }
+        .msg-media img, .msg-media video { max-width: 100%; max-height: 240px; border-radius: 8px; margin-top: 5px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <header>
+            <h1>AI 灵感探索工坊</h1>
+            <p>用创意链接世界，用灵感点亮课堂</p>
+        </header>
+
+        <div id="login-view">
+            <p style="margin-bottom: 15px; font-size: 14px; color: var(--text-muted);" id="login-tip">请输入你的探索者昵称以加入互动：</p>
+            <input type="text" id="username" class="input-styled" placeholder="老师叫我小刘就好了" maxlength="12"><br><br>
+            <button class="btn" onclick="enterWorkspace()">进入互动空间</button>
+        </div>
+
+        <div id="main-content">
+            <div class="fortune-box">
+                <p style="font-size: 14px; font-weight: 500;">🔮 AI 灵感今日运势</p>
+                <button class="btn" id="draw-btn" onclick="drawLottery()" style="padding: 8px 18px; font-size: 13px; margin-top: 10px;">抽取今日灵感签</button>
+                <div id="fortune-result"></div>
+            </div>
+
+            <div class="chat-section">
+                <h3 style="font-size: 16px; color: #374151;" id="welcome-title">💬 课堂灵感看板</h3>
+                <div class="post-box">
+                    <textarea id="post-text" placeholder="在这里输入你想分享的AI想法、Prompt，或者课堂提问..."></textarea>
+                    
+                    <div class="media-upload-bar">
+                        <label class="file-label">🖼️ 上传图片 <input type="file" id="upload-image" accept="image/*" onchange="handleFileSelect(event, 'image')"></label>
+                        <label class="file-label">🎬 上传视频 <input type="file" id="upload-video" accept="video/*" onchange="handleFileSelect(event, 'video')"></label>
+                        <span id="file-status" style="font-size: 12px; color: var(--primary-mint);"></span>
+                        <button class="btn" onclick="submitPost()" style="margin-left: auto; padding: 8px 20px; font-size: 14px;">发布分享</button>
+                    </div>
+                </div>
+
+                <div class="message-feed" id="message-feed"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = "";
+        let currentAttachedMedia = { type: null, data: null };
+
+        const fortunePool = [
+            "【大吉】提示词直击灵魂！今日AI生成的图片毫无瑕疵，逻辑完美闭环。",
+            "【中吉】算力爆棚。今日非常适合调试Agent，代码生成一气呵成。",
+            "【小吉】灵感涌现。适合天马行空地胡思乱想，AI会完美接住你的脑洞。",
+            "【平签】运行稳定。今日无Bug也无惊喜，适合继续学习继续沉淀。",
+            "【小凶】服务器微醺。今日Prompt可能会跑偏，但也可能会收获意想不到的成果。"
+        ];
+
+        // ⚡ 核心锁死逻辑：页面一加载，自动检测该设备（IP级本地标识）是否已经绑定过昵称
+        window.onload = function() {
+            const savedUser = localStorage.getItem('bound_device_user');
+            if (savedUser) {
+                // 如果发现该设备已经绑定过名字，直接锁死，不允许他在登录页瞎改
+                document.getElementById('username').value = savedUser;
+                document.getElementById('username').disabled = true;
+                document.getElementById('login-tip').innerHTML = `✨ 检测到已绑定设备，欢迎回来：<strong style="color:var(--primary-mint);">@${savedUser}</strong>`;
+            }
+        }
+
+        function enterWorkspace() {
+            let nameInput = document.getElementById('username').value.trim();
+            if(!nameInput) { alert("起一个炫酷的昵称才能进入哦！"); return; }
+            
+            // 🔒 强制绑定：如果本地没有绑定记录，说明是第一次进入，将其作为该设备的“唯一合法ID”
+            const savedUser = localStorage.getItem('bound_device_user');
+            if (!savedUser) {
+                localStorage.setItem('bound_device_user', nameInput);
+                currentUser = nameInput;
+            } else {
+                // 如果本地有，不管他在前端怎么篡改输入框的值，后台一律强制用回原本绑定的真实名字
+                currentUser = savedUser;
+            }
+            
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('main-content').style.display = 'flex';
+            document.getElementById('welcome-title').innerText = `💬 课堂灵感看板 (当前探索者: @${currentUser})`;
+            
+            loadMessages();
+            checkFortuneStatus();
+        }
+
+        function checkFortuneStatus() {
+            const lastDrawDate = localStorage.getItem(`fortune_date_${currentUser}`);
+            const today = new Date().toDateString();
+            if (lastDrawDate === today) {
+                const savedFortune = localStorage.getItem(`fortune_res_${currentUser}`);
+                showFortuneResult(savedFortune, true);
+            }
+        }
+
+        function drawLottery() {
+            const today = new Date().toDateString();
+            let finalFortune = "";
+            const luckyRoll = Math.random() * 100;
+
+            if (luckyRoll <= 5) {
+                finalFortune = "✨【金色传说·锦鲤签】恭喜你触发了5%的隐藏欧皇概率！今日灵感无限，请凭此屏幕截图，下课后速去找小刘老师领取你的幸运专属奖品！🎁";
+            } else {
+                finalFortune = fortunePool[Math.floor(Math.random() * fortunePool.length)];
+            }
+            
+            localStorage.setItem(`fortune_date_${currentUser}`, today);
+            localStorage.setItem(`fortune_res_${currentUser}`, finalFortune);
+            
+            showFortuneResult(finalFortune, false);
+        }
+
+        function showFortuneResult(text, isCached) {
+            const resDiv = document.getElementById('fortune-result');
+            const btn = document.getElementById('draw-btn');
+            
+            resDiv.innerText = text + (isCached ? " (今天你已经抽过签啦)" : "");
+            resDiv.style.display = 'block';
+            btn.style.display = 'none';
+
+            if (text.includes("金色传说")) {
+                resDiv.className = "gold-tag";
+            } else {
+                resDiv.className = "normal-tag";
+            }
+        }
+
+        function handleFileSelect(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 10 * 1024 * 1024) { alert("文件有点太大了，请压缩到10MB以内哦！"); return; }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentAttachedMedia = { type: type, data: e.target.result };
+                document.getElementById('file-status').innerText = `已成功暂存一个${type === 'image' ? '图片' : '视频'}`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function submitPost() {
+            const text = document.getElementById('post-text').value.trim();
+            if (!text && !currentAttachedMedia.data) { alert("总得写点什么或者传个媒体文件吧～"); return; }
+
+            const newMsg = {
+                user: currentUser,
+                text: text,
+                media: currentAttachedMedia,
+                time: new Date().toLocaleString()
+            };
+
+            let history = JSON.parse(localStorage.getItem('ai_classroom_feed')) || [];
+            history.unshift(newMsg);
+            localStorage.setItem('ai_classroom_feed', JSON.stringify(history));
+
+            document.getElementById('post-text').value = "";
+            currentAttachedMedia = { type: null, data: null };
+            document.getElementById('file-status').innerText = "";
+            document.getElementById('upload-image').value = "";
+            document.getElementById('upload-video').value = "";
+
+            loadMessages();
+        }
+
+        function loadMessages() {
+            const feed = document.getElementById('message-feed');
+            feed.innerHTML = '';
+            const history = JSON.parse(localStorage.getItem('ai_classroom_feed')) || [];
+
+            if(history.length === 0) {
+                feed.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:20px;">看板空空如也，快来发布第一条灵感吧！</p>`;
+                return;
+            }
+
+            history.forEach(msg => {
+                const card = document.createElement('div');
+                card.className = 'msg-card';
+                let mediaHtml = "";
+                if (msg.media && msg.media.data) {
+                    if (msg.media.type === 'image') {
+                        mediaHtml = `<div class="msg-media"><img src="${msg.media.data}" alt="uploaded"></div>`;
+                    } else if (msg.media.type === 'video') {
+                        mediaHtml = `<div class="msg-media"><video src="${msg.media.data}" controls></video></div>`;
+                    }
+                }
+                card.innerHTML = `
+                    <div class="msg-meta">
+                        <span class="msg-user">@${msg.user}</span>
+                        <span>${msg.time}</span>
+                    </div>
+                    ${msg.text ? `<div class="msg-text">${msg.text}</div>` : ''}
+                    ${mediaHtml}
+                `;
+                feed.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
