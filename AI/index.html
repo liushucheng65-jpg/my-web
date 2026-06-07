@@ -94,7 +94,7 @@
     <script>
         // 🔒 填空区：在这里填入你在 Supabase API 面板拿到的两个核心凭证
         const SUPABASE_URL = "https://oueoeobuzhrpjkyaagjz.supabase.co"; 
-        const SUPABASE_ANON_KEY = "sb_publishable_LgPOIE6Fc40V7ZEsNAdrNQ_1HPhusK-";
+        const SUPABASE_ANON_KEY = "sb_publishable_LgPOIE6Fc4OV7ZEsNAdrNQ_1HPhusK-";
 
         let supabaseClient = null;
 
@@ -191,7 +191,7 @@
             reader.readAsDataURL(file);
         }
 
-        // 🚀 发送消息到 Supabase 云端
+        // 🚀 发送消息到 Supabase 云端（全自动 DEBUG 版）
         async function submitPost() {
             const text = document.getElementById('post-text').value.trim();
             if (!text && !currentAttachedMedia.data) return;
@@ -200,20 +200,21 @@
             submitBtn.innerText = "正在传输云端...";
             submitBtn.disabled = true;
 
+            const payload = { 
+                username: currentUser, 
+                content: text, 
+                media_type: currentAttachedMedia.type, 
+                media_data: currentAttachedMedia.data 
+            };
+
             const { data, error } = await supabaseClient
                 .from('classroom_feed')
-                .insert([
-                    { 
-                        username: currentUser, 
-                        content: text, 
-                        media_type: currentAttachedMedia.type, 
-                        media_data: currentAttachedMedia.data 
-                    }
-                ]);
+                .insert([payload]);
 
             if (error) {
-                alert("云端同步失败，请检查网络或配置");
-                console.error(error);
+                // 🛠️ 精准爆破：如果报错，直接把底层的具体拒绝原因通过弹窗弹出来
+                alert("云端同步失败！具体原因: " + error.message + " (代码: " + error.code + ")");
+                console.error("错误详情:", error);
             } else {
                 document.getElementById('post-text').value = "";
                 currentAttachedMedia = { type: null, data: null };
