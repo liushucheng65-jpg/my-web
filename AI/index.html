@@ -93,13 +93,13 @@
 
     <script>
         // 🔒 填空区：在这里填入你在 Supabase API 面板拿到的两个核心凭证
-        const SUPABASE_URL = "https://oueoeobuzhrpjkyaagjz.supabase.co/rest/v1/"; 
-        const SUPABASE_ANON_KEY = "sb_publishable_LgPOIE6Fc4OV7ZEsNAdrNQ_1HPhusK-";
+        const SUPABASE_URL = "https://oueoeobuzhrpjkyaagjz.supabase.co"; 
+        const SUPABASE_ANON_KEY = "sb_publishable_LgPOIE6Fc40V7ZEsNAdrNQ_1HPhusK-";
 
         let supabaseClient = null;
 
-        // 初始化驱动验证
-        if(SUPABASE_URL !== "https://oueoeobuzhrpjkyaagjz.supabase.co/rest/v1/") {
+        // 初始化驱动验证（修正了判断条件，确保顺利初始化）
+        if(SUPABASE_URL !== "" && SUPABASE_URL !== "https://oueoeobuzhrpjkyaagjz.supabase.co/rest/v1/") {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } else {
             alert("⚠️ 小刘老师，别忘了在代码第 81-82 行配置你的 Supabase 数据库密钥哦！");
